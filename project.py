@@ -88,7 +88,7 @@ def preprocess(data_frame):
     data_frame = encode_block(data_frame)
 
     # one-hot encode the Description column
-    encode_description(data_frame)
+    data_frame = encode_description(data_frame)
 
     return data_frame
 
