@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 from pandas import DataFrame
 
-pd.set_option('display.max_columns', None)
+#pd.set_option('display.max_columns', None)
 
 
 def extract_target_values(df, column_name, relevant_target_values):
@@ -69,15 +69,26 @@ def strip_block_numbers(data_frame):
 
 
 def encode_block(data_frame):
-    return data_frame
+    blocks_encoded = pd.get_dummies(data_frame.Block, prefix='Block')
+    encoded_df = pd.merge(data_frame, blocks_encoded, left_index=True, right_index=True)
+    return encoded_df
+
+
+def encode_description(data_frame):
+    description_encoded = pd.get_dummies(data_frame.Description, prefix='Description')
+    encoded_df = pd.merge(data_frame, description_encoded, left_index=True, right_index=True)
+    return encoded_df
 
 
 def preprocess(data_frame):
     # remove unecessary address numbers
     data_frame = strip_block_numbers(data_frame)
 
-    # on-hot-encode the Block values
+    # on-hot-encode the Block column
     data_frame = encode_block(data_frame)
+
+    # one-hot encode the Description column
+    encode_description(data_frame)
 
     return data_frame
 
