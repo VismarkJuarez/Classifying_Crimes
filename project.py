@@ -1,9 +1,12 @@
 "#!/usr/bin/env python3"
 import sys
 import pandas as pd
+import numpy as np
 from pandas import DataFrame
 
 #pd.set_option('display.max_columns', None)
+from sklearn.dummy import DummyClassifier
+from sklearn.model_selection import train_test_split
 
 
 def extract_target_values(df, column_name, relevant_target_values):
@@ -92,6 +95,56 @@ def preprocess(data_frame):
 
     return data_frame
 
+'''
+Creates a baseline Dummy Model using Sklearn's DummyClassifier. The value for the
+DummyClassifier's 'strategy' parameter argument is passed in as an argument for this
+method.
+'''
+def predict_with_baseline_dummy_model(_strategy: str, X: np.array, y: np.array, x: np.array) -> None:
+    dummy_clf_stratified = DummyClassifier(strategy=_strategy)
+    dummy_clf_stratified.fit(X, y)
+    dummy_clf_stratified.predict(x)
+    print('dummy_clf_stratified score (strategy={}): {}%'.format(_strategy, dummy_clf_stratified.score(X, y) * 100))
+
+
+'''
+Will split the specified dataset into three subsets -- training (70%),
+develop (15%), and testing (15%).
+'''
+def split_into_train_develop_test(unlabeled_dataset: pd.DataFrame, dataset_label_values: pd.DataFrame):
+    '''
+    Splitting dataset into a training (70%), development (15%) and test (15%).
+    [NOTE: splittiing develop and test into 30% for now. This 30% will be halfed,
+    yielding 15% and 15% of the total dataset, respectively]
+    '''
+    X_train, X_develop_test, y_train, y_develop_test = train_test_split(unlabeled_dataset,
+                                                                        dataset_label_values, test_size=0.30, random_state=42)
+
+    '''
+    Splitting the X_develop_test and y_develop_test (which are 30% of the dataset)
+    in half, so that the resulting dataframe sizes yield 15% of the total dataset
+    each.
+    '''
+    X_develop, X_test, y_develop, y_test = train_test_split(X_develop_test, y_develop_test,
+                                                            test_size=0.5, random_state=42)
+    return X_train, X_develop, X_test, y_train, y_develop, y_test
+
+
+'''
+Takes the entire labeled dataset, and "un-labels" it It simply removes the label from each
+entry so that we can use the yielded unlabeled data to fit a Machine Learning model.
+'''
+def extract_unlabeled_data(dataset: pd.DataFrame, target_label: str) -> pd.DataFrame:
+    return dataset.drop(target_label, axis=1) #axis=1 specifies that the deleted item is a column, as opposed to a row (0)
+
+
+'''
+Extracts a new DataFrame containing only the labels for each row.  This will be used to
+compare the Machine Learning model's predictions with the actual values.
+'''
+def extract_target_label_values(dataset: pd.DataFrame, target_label: str) -> pd.DataFrame:
+    return dataset[target_label]
+
 
 def main():
     # Keeping name upper-cased to let the world know this var shouldn't be changed
@@ -104,7 +157,19 @@ def main():
     df = preprocess(df)
 
     # store the filtered dataset (not necessary, but useful  JiC).
-    df.to_csv(index=False, path_or_buf="data/filtered-crime-data.csv")
+    #df.to_csv(index=False, path_or_buf="data/filtered-crime-data.csv")
+
+    unlabeled_crime_dataset = extract_unlabeled_data(df, "Primary Type")
+    crime_dataset_label_values = extract_target_label_values(df, "Primary Type")
+
+
+    # Split data into train, develop, and test subsets
+    X_train, X_develop, X_test, y_train, y_develop, y_test = split_into_train_develop_test(unlabeled_crime_dataset,
+                                                                                           crime_dataset_label_values)
+
+    # Establishing a baseline performance using Sklearn's DummyClassifier with strategy=stratified and most_frequent:
+    predict_with_baseline_dummy_model("stratified", X_train, y_train, X_develop)
+    predict_with_baseline_dummy_model("most_frequent", X_train, y_train, X_develop)
 
     print(df.head())
 
