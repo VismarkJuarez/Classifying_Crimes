@@ -2,6 +2,7 @@
 import sys
 import pandas as pd
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
 from pandas import DataFrame
 
 #pd.set_option('display.max_columns', None)
@@ -33,7 +34,7 @@ def filter_dataset(raw_data_path):
     raw_dataset_filepath = "data/unprocessed-crime-data.csv"  # raw, unprocessed dataset location.
     raw_df = pd.read_csv(raw_dataset_filepath)  # loading the raw data.
     column_name = "Primary Type"  # the column to filter on
-    relevant_target_values = ["BATTERY", "THEFT"]  # can be changed for experimentation
+    relevant_target_values = ["BATTERY", "THEFT", "CRIMINAL DAMAGE"]  # can be changed for experimentation
     df = extract_target_values(raw_df, column_name, relevant_target_values)  # filtering the raw dataset
 
     return df  # returning the filtered dataframe
@@ -211,7 +212,9 @@ def main():
     predict_with_baseline_dummy_model("stratified", X_train, y_train, X_develop)
     predict_with_baseline_dummy_model("most_frequent", X_train, y_train, X_develop)
 
-    print(df.head())
+    # print(df.head())
+
+
 
 
 
@@ -225,7 +228,7 @@ def main():
     training_data, testing_data, training_labels, testing_labels = train_test_split(unlabeled_crime_dataset, crime_dataset_label_values, test_size=0.33, random_state=42)
 
     #teaching the model
-    model = LogisticRegression()
+    model = KNeighborsClassifier(n_neighbors=3) # LogisticRegression()
     model.fit(training_data, training_labels)
 
     #make predictions
