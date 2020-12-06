@@ -31,7 +31,7 @@ def filter_dataset(raw_data_path):
     raw_dataset_filepath = "data/unprocessed-crime-data.csv"  # raw, unprocessed dataset location.
     raw_df = pd.read_csv(raw_dataset_filepath)  # loading the raw data.
     column_name = "Primary Type"  # the column to filter on
-    relevant_target_values = ["BATTERY", "THEFT", "CRIMINAL DAMAGE"]  # can be changed for experimentation
+    relevant_target_values = ["BATTERY", "THEFT"]  # can be changed for experimentation
     df = extract_target_values(raw_df, column_name, relevant_target_values)  # filtering the raw dataset
 
     return df  # returning the filtered dataframe
@@ -157,7 +157,7 @@ def main():
     df = preprocess(df)
 
     # store the filtered dataset (not necessary, but useful  JiC).
-    #df.to_csv(index=False, path_or_buf="data/filtered-crime-data.csv")
+    df.to_csv(index=False, path_or_buf="data/filtered-crime-data.csv")
 
     unlabeled_crime_dataset = extract_unlabeled_data(df, "Primary Type")
     crime_dataset_label_values = extract_target_label_values(df, "Primary Type")
