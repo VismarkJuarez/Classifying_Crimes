@@ -2,6 +2,7 @@
 import sys
 import pandas as pd
 import numpy as np
+import seaborn as sns
 from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.dummy import DummyClassifier
@@ -143,6 +144,21 @@ def extract_target_label_values(dataset: pd.DataFrame, target_label: str) -> pd.
     return dataset[target_label]
 
 
+def visualize_missing_values(df):
+    sns.heatmap(df.isnull(), yticklabels=False, cbar=False, cmap='viridis')
+
+
+def remove_missing_values(df):
+    return df.dropna()
+
+
+def visualize_and_remove_missing_values(df):
+    visualize_missing_values(df)
+    df = remove_missing_values(df)
+    visualize_missing_values(df)
+    return df
+
+
 def main():
     # Keeping name upper-cased to let the world know this var shouldn't be changed
     RAW_DATA_PATH = "data/filtered-crime-data.csv"
@@ -150,10 +166,10 @@ def main():
     df = filter_dataset(RAW_DATA_PATH)
     df = clean_dataset(df)
 
+    df = visualize_and_remove_missing_values(df)
+
     # Perform any preprocessing logic
     df = encode(df)
-
-    print("columns: {}". format(df.columns))
 
     # store the filtered dataset (not necessary, but useful  JiC).
     df.to_csv(index=False, path_or_buf="data/filtered-crime-data.csv")
@@ -168,18 +184,17 @@ def main():
     predict_with_baseline_dummy_model("stratified", X_train, y_train, X_develop)
     predict_with_baseline_dummy_model("most_frequent", X_train, y_train, X_develop)
 
-
-    #Performing fitting. Splitting dataset for training ad testing the actual model
+    # Performing fitting. Splitting dataset for training ad testing the actual model
     training_data, testing_data, training_labels, testing_labels = train_test_split(unlabeled_crime_dataset, crime_dataset_label_values, test_size=0.33, random_state=42)
 
-    #teaching the model
+    # Teaching the model
     model = KNeighborsClassifier(n_neighbors=3) # LogisticRegression()
     model.fit(training_data, training_labels)
 
-    #make predictions
+    # Make predictions
     predictions = model.predict(testing_data)
 
-    #guaging how good our model performed
+    # Guaging how good our model performed
     print('---------------------------------- Prediction Accuracy: -----------------------------')
     print('Below are performance metrics.')
     print(classification_report(testing_labels, predictions))
