@@ -188,7 +188,7 @@ def main():
     training_data, testing_data, training_labels, testing_labels = train_test_split(unlabeled_crime_dataset, crime_dataset_label_values, test_size=0.33, random_state=42)
 
     # Teaching the model
-    model = KNeighborsClassifier(n_neighbors=3) # LogisticRegression()
+    model = KNeighborsClassifier(n_neighbors=4, weights='uniform') # LogisticRegression()
     model.fit(training_data, training_labels)
 
     # Make predictions
