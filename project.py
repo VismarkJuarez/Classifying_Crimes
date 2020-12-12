@@ -2,6 +2,8 @@
 import sys
 import pandas as pd
 import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 import seaborn as sns
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -160,6 +162,10 @@ def visualize_and_remove_missing_values(df):
 
 
 def main():
+    # the data, split between train and test sets
+    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+    print('keras data was loaded successfully')
+
     # Keeping name upper-cased to let the world know this var shouldn't be changed
     RAW_DATA_PATH = "data/filtered-crime-data.csv"
 
